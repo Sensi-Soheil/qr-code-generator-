@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+      integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <title>QR Code Generator</title>
+    <style>
+    
+    </style>
+  </head>
+
+  <body>
+    <div class="wrapper">
+      <input type="text" id="userInput" placeholder="Enter some text or URL" />
+      <div class="options">
+        <select class="sizeOptions">
+          <option value="100" selected>100x100</option>
+          <option value="200">200x200</option>
+          <option value="300">300x300</option>
+        </select>
+        <input type="color" id="BGColor" class="color-inp" />
+        <input type="color" id="FGColor" class="color-inp" />
+      </div>
+      <div class="box">
+        <button id="submit" disabled>Generate</button>
+        <a href="#" id="download">Download</a>
+      </div>
+      <div class="container"></div>
+    </div>
+    
+    <script>
+      const container = document.querySelector(".container");
+      const userInput = document.getElementById("userInput");
+      const submitButton = document.getElementById("submit");
+      const downloadButton = document.getElementById("download");
+      const sizeOptions = document.querySelector(".sizeOptions");
+      const BGColor = document.getElementById("BGColor");
+      const FGColor = document.getElementById("FGColor");
+      let QR_code;
+      let sizeChoice, BGColorChoice, FGColorChoice;
+      //set size
+      sizeOptions.addEventListener("change", () => {
+        sizeChoice = sizeOptions.value;
+      });
+      //set background color
+      BGColor.addEventListener("input", () => {
+        BGColorChoice = BGColor.value;
+      });
+      //set foreground color
+      FGColor.addEventListener("input", () => {
+        FGColorChoice = FGColor.value;
+      });
+      //format input
+      const inputFormatter = (value) => {
+        value = value.replace(/[^a-z0-9A-Z]+/g, "");
+        return value;
+      };
+      submitButton.addEventListener("click", async () => {
+        container.innerHTML = "";
+        //QR code generation
+        QR_code = await new QRCode(container, {
+          text: userInput.value,
+          width: sizeChoice,
+          height: sizeChoice,
+          colorDark: FGColorChoice,
+          colorLight: BGColorChoice,
+        });
+        //set url for download
+        const src = container.firstChild.toDataURL("image/png");
+        downloadButton.href = src;
+        let userValue = userInput.value;
+        try {
+          userValue = new URL(userValue).hostname;
+        } catch (_) {}
+        userValue = inputFormatter(userValue);
+        downloadButton.download = `${userValue}QR`;
+        downloadButton.classList.remove("hide");
+      });
+      userInput.addEventListener("input", () => {
+        //for blank input hide download button
+        if (userInput.value.trim().length < 1) {
+          submitButton.disabled = true;
+          downloadButton.href = "";
+          downloadButton.classList.add("hide");
+        } else {
+          submitButton.disabled = false;
+        }
+      });
+      window.onload = () => {
+        container.innerHTML = "";
+        sizeChoice = 100;
+        sizeOptions.value = 100;
+        userInput.value = "";
+        BGColor.value = BGColorChoice = "#FFFFFF";
+        FGColor.value = FGColorChoice = "#000000";
+        downloadButton.classList.add("hide");
+        submitButton.disabled = true;
+      };
+    </script>
+  </body>
+  </html>
+  
